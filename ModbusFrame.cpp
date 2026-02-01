@@ -139,14 +139,16 @@ uint8_t ModbusFrame::SendFrame(uint8_t u8MBFunction, uint8_t u8MBSlave, uint16_t
     //end NK add
     // 
     // transmit request
+    
     for (i = 0; i < u8ModbusADUSize; i++)
     {
         _serial->write(u8ModbusADU[i]);
+        delay(5); // we're getting truncation // the giga is so much faster than the nano that we have to put in a 5ms delay between bytes
     }
 
     u8ModbusADUSize = 0;
     _serial->flush();    // flush transmit buffer
-
+   
       // NK added the following two lines
     digitalWrite(m_DE, LOW);
     digitalWrite(m_RE, LOW);
@@ -210,6 +212,7 @@ uint8_t ModbusFrame::ReceiveFrame( uint8_t ThisAddress, bool isClient)
     // the first byte of a packet is the target ID
     // ignore all bytes until you hit one that is the target ID
     bool haveHeader = false;
+    
   while (!done)
   {
     if (_serial->available() )
@@ -218,6 +221,7 @@ uint8_t ModbusFrame::ReceiveFrame( uint8_t ThisAddress, bool isClient)
         {
             uint8_t ch;
             ch = _serial->read();
+    
             if (ch == ThisAddress)
             {
                 haveHeader = true;
@@ -238,7 +242,7 @@ uint8_t ModbusFrame::ReceiveFrame( uint8_t ThisAddress, bool isClient)
             {
                 uint8_t ch;
                 ch = _serial->read();
-
+                
                 u8ModbusADU[u8ModbusADUSize++] = ch;
 
 
